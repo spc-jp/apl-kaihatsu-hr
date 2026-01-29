@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アプリ開発ヒヤリングシート | 思考整理ツール</title>
+    <style>
+        :root {
+            --primary-color: #2563EB;
+            --primary-hover: #1D4ED8;
+            --bg-color: #F8FAFC;
+            --surface-color: #FFFFFF;
+            --text-main: #1E293B;
+            --text-sub: #64748B;
+            --border-color: #E2E8F0;
+            --accent-bg: #EFF6FF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden; /* Prevent body scroll, handle in columns */
+        }
+
+        /* Layout */
+        .header {
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        /* Columns */
+        .column {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .column-left {
+            background-color: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            max-width: 50%;
+        }
+
+        .column-right {
+            background-color: var(--bg-color);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .form-hint {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .example-select {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border: 1px dashed var(--primary-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            background-color: var(--accent-bg);
+            cursor: pointer;
+        }
+        
+        .example-select:hover {
+            background-color: #DBEAFE;
+        }
+
+        input[type="text"],
+        textarea,
+        select:not(.example-select) {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+            background-color: #fff;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:not(.example-select):focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Radio Buttons Group */
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: #fff;
+            transition: all 0.2s;
+        }
+
+        .radio-label:hover {
+            background-color: var(--accent-bg);
+        }
+
+        .radio-label input {
+            margin-right: 0.5rem;
+        }
+
+        /* Generate Button */
+        .btn-generate {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            margin-top: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-generate:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-generate:active {
+            transform: scale(0.98);
+        }
+
+        /* Output Area */
+        .output-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .output-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-main);
+        }
+
+        .btn-copy {
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-copy:hover {
+            background-color: var(--bg-color);
+            border-color: var(--text-sub);
+        }
+
+        .output-content {
+            flex: 1;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: "Menlo", "Monaco", "Courier New", monospace;
+            font-size: 0.95rem;
+            color: #334155;
+            background-color: var(--bg-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .placeholder-text {
+            color: var(--text-sub);
+            text-align: center;
+            margin-top: 40%;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+                overflow-y: auto;
+            }
+            
+            body {
+                overflow: auto;
+            }
+
+            .column-left {
+                max-width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .output-card {
+                min-height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <h1>🛠️ アプリ開発ヒヤリング & プロンプト生成ツール</h1>
+    </header>
+
+    <div class="container">
+        <!-- Left Column: Input -->
+        <div class="column column-left">
+            <form id="hearingForm">
+                
+                <div class="form-group">
+                    <label class="form-label">このアプリは誰が使いますか？</label>
+                    <span class="form-hint">例：社長、現場スタッフ、お客様、顧問先 など</span>
+                    
+                    <select class="example-select" onchange="applyExample(this, 'targetUser')">
+                        <option value="">💡 よくある例から選ぶ（選択すると入力されます）</option>
+                        <option value="経営者・オーナー自身">経営者・オーナー自身</option>
+                        <option value="現場の作業スタッフ">現場の作業スタッフ</option>
+                        <option value="営業・販売担当者">営業・販売担当者</option>
+                        <option value="経理・事務担当者">経理・事務担当者</option>
+                        <option value="お客様・クライアント">お客様・クライアント</option>
+                    </select>
+
+                    <input type="text" id="targetUser" placeholder="入力、または上の例から選択" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">どんな場面・業務で困っていますか？</label>
+                    <span class="form-hint">例：お客様への説明時、毎月の請求書作成時、在庫確認時 など</span>
+                    
+                    <select class="example-select" onchange="applyExample(this, 'situation')">
+                        <option value="">💡 よくある例から選ぶ（選択すると入力されます）</option>
+                        <option value="毎日の日報や報告書の作成時">毎日の日報や報告書の作成時</option>
+                        <option value="見積書や請求書の作成・発行時">見積書や請求書の作成・発行時</option>
+                        <option value="お客様からの電話・問合せ対応中">お客様からの電話・問合せ対応中</option>
+                        <option value="在庫確認や備品発注のタイミング">在庫確認や備品発注のタイミング</option>
+                        <option value="スタッフのスケジュール調整時">スタッフのスケジュール調整時</option>
+                    </select>
+
+                    <input type="text" id="situation" placeholder="入力、または上の例から選択" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">いま一番「めんどう」「ストレス」だと感じていること</label>
+                    <span class="form-hint">例：手計算でミスが出る、情報がバラバラで探すのが大変 など</span>
+
+                    <select class="example-select" onchange="applyExample(this, 'painPoint')">
+                        <option value="">💡 よくある例から選ぶ（選択すると入力されます）</option>
+                        <option value="手書きや手入力による転記ミスが多い">手書きや手入力による転記ミスが多い</option>
+                        <option value="過去の履歴や情報を探すのに時間がかかる">過去の履歴や情報を探すのに時間がかかる</option>
+                        <option value="計算が複雑で、毎回合っているか不安になる">計算が複雑で、毎回合っているか不安になる</option>
+                        <option value="言った言わないのトラブルが起きやすい">言った言わないのトラブルが起きやすい</option>
+                        <option value="出先でスマホから確認できないのが不便">出先でスマホから確認できないのが不便</option>
+                    </select>
+
+                    <textarea id="painPoint" placeholder="具体的に入力、または上の例から選択" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">それが解決したら、どうなったら嬉しいですか？</label>
+                    <span class="form-hint">例：作業時間が半分になる、ミスがゼロになる、お客様に喜ばれる など</span>
+
+                    <select class="example-select" onchange="applyExample(this, 'desiredOutcome')">
+                        <option value="">💡 よくある例から選ぶ（選択すると入力されます）</option>
+                        <option value="作業時間を大幅に短縮して、残業を減らしたい">作業時間を大幅に短縮して、残業を減らしたい</option>
+                        <option value="計算ミスや入力ミスをゼロにして安心したい">計算ミスや入力ミスをゼロにして安心したい</option>
+                        <option value="外出先からでもスマホでサッと確認したい">外出先からでもスマホでサッと確認したい</option>
+                        <option value="属人化をなくし、誰でも担当できるようにしたい">属人化をなくし、誰でも担当できるようにしたい</option>
+                        <option value="単純作業を自動化して、本業に集中したい">単純作業を自動化して、本業に集中したい</option>
+                    </select>
+
+                    <textarea id="desiredOutcome" placeholder="入力、または上の例から選択" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">使う人のITレベル</label>
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="itLevel" value="苦手（PC操作に不安がある）" checked> ITが苦手</label>
+                        <label class="radio-label"><input type="radio" name="itLevel" value="普通（スマホ・PCは使える）"> 普通</label>
+                        <label class="radio-label"><input type="radio" name="itLevel" value="慣れている（ツールを使いこなせる）"> 慣れている</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">画面のイメージ</label>
+                    <select id="uiPreference">
+                        <option value="とにかくシンプル（文字大きく、迷わせない）">とにかくシンプル（文字大きく、迷わせない）</option>
+                        <option value="1画面完結（スクロールだけで全て終わる）">1画面完結（スクロールだけで全て終わる）</option>
+                        <option value="カード型（情報を整理して並べる）">カード型（情報を整理して並べる）</option>
+                        <option value="ダッシュボード型（数字や状況を一目で把握）">ダッシュボード型（数字や状況を一目で把握）</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">まずは「完成度より試せる形」で問題ありませんか？</label>
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="mvpAgreement" value="はい（スピード優先）" checked> はい</label>
+                        <label class="radio-label"><input type="radio" name="mvpAgreement" value="相談しながら進めたい"> 相談したい</label>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-generate" onclick="generatePrompt()">
+                    アプリ設計プロンプトを作成する ✨
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Column: Output -->
+        <div class="column column-right">
+            <div class="output-card">
+                <div class="output-header">
+                    <span class="output-title">Gemini Canvas用プロンプト</span>
+                    <button class="btn-copy" onclick="copyToClipboard()" id="copyBtn">
+                        📋 コピーする
+                    </button>
+                </div>
+                <div id="outputContent" class="output-content">
+                    <div class="placeholder-text">
+                        左側の項目を入力して<br>
+                        ボタンを押してください。<br>
+                        <br>
+                        ここにGemini用の設計指示書が<br>
+                        自動生成されます。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to apply selected example to input
+        function applyExample(selectElement, targetId) {
+            const targetInput = document.getElementById(targetId);
+            if (selectElement.value) {
+                targetInput.value = selectElement.value;
+                // Add a visual flash effect to show it changed
+                targetInput.style.backgroundColor = "#EFF6FF";
+                setTimeout(() => {
+                    targetInput.style.backgroundColor = "#fff";
+                }, 300);
+            }
+        }
+
+        function generatePrompt() {
+            // Get values
+            const targetUser = document.getElementById('targetUser').value;
+            const situation = document.getElementById('situation').value;
+            const painPoint = document.getElementById('painPoint').value;
+            const desiredOutcome = document.getElementById('desiredOutcome').value;
+            const itLevel = document.querySelector('input[name="itLevel"]:checked').value;
+            const uiPreference = document.getElementById('uiPreference').value;
+            const mvpAgreement = document.querySelector('input[name="mvpAgreement"]:checked').value;
+
+            // Simple Validation
+            if (!targetUser || !painPoint) {
+                alert("「誰が使うか」と「困っていること」は最低限入力してください。");
+                return;
+            }
+
+            // Generate Content Logic
+            const promptText = `
+# Geminiキャンバス アプリ作成依頼
+
+以下の要件に基づき、課題解決のためのWebアプリ（プロトタイプ）を作成してください。
+私がGeminiキャンバス上で動作確認・編集ができる「1つのHTMLファイル」として出力してください。
+
+## 1. アプリの概要
+**【課題の要約】**
+${targetUser}が、${situation}において、「${painPoint}」という問題を抱えています。
+
+**【アプリの目的】**
+この業務の${desiredOutcome}を実現すること。
+
+**【想定ユーザー】**
+${targetUser}
+（ITレベル: ${itLevel}）
+
+## 2. アプリの機能要件
+以下の課題解決に必要な「最小限の機能」を3〜5個搭載してください。
+- 課題: ${painPoint}
+- 理想: ${desiredOutcome}
+- 方針: ${mvpAgreement}
+
+※Gemini側で、上記課題を解決するために最適かつシンプルな機能を推測して実装してください。
+（例：自動計算、定型文生成、チェックリスト、データ保存機能など）
+
+## 3. デザイン・UI要件
+- **画面構成**: ${uiPreference}
+- **ユーザー層への配慮**: ユーザーはITレベルが「${itLevel}」のため、専門用語は避け、直感的な操作ができるようにしてください。
+- **デザイン**: 清潔感のある白ベース。文字は読みやすく大きめに設定してください。
+
+## 4. 技術要件
+- **構成**: HTML, CSS, JavaScriptを1つのファイル（index.html）にまとめること。
+- **ライブラリ**: 外部ライブラリは極力使用せず（またはCDNで完結させ）、コピペだけで動くようにすること。
+- **データ保存**: サーバーサイドは作らず、localStorage（ブラウザ保存）を使って、リロードしてもデータが消えないようにしてください。
+- **コード品質**: 後から私がGeminiキャンバスで編集しやすいよう、可読性の高いコードと日本語のコメントを記述してください。
+
+以上、この条件で動くアプリのコードを書いてください。
+`;
+
+            // Display Output
+            const outputArea = document.getElementById('outputContent');
+            outputArea.textContent = promptText.trim();
+        }
+
+        function copyToClipboard() {
+            const content = document.getElementById('outputContent');
+            if (content.querySelector('.placeholder-text')) {
+                alert("まずはプロンプトを生成してください。");
+                return;
+            }
+
+            const textToCopy = content.textContent;
+
+            // Function to handle UI updates on success
+            const showSuccess = () => {
+                const btn = document.getElementById('copyBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ コピー完了';
+                btn.style.backgroundColor = '#dcfce7';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.backgroundColor = '#fff';
+                }, 2000);
+            };
+
+            // Fallback method using document.execCommand('copy')
+            const fallbackCopyTextToClipboard = (text) => {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                
+                // Avoid scrolling to bottom
+                textArea.style.top = "0";
+                textArea.style.left = "0";
+                textArea.style.position = "fixed";
+
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    const successful = document.execCommand('copy');
+                    if (successful) {
+                        showSuccess();
+                    } else {
+                        alert('コピーに失敗しました。手動でコピーしてください。');
+                    }
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                    alert('コピーに失敗しました。手動でコピーしてください。');
+                }
+
+                document.body.removeChild(textArea);
+            }
+
+            // Try the Async Clipboard API first, then fallback
+            if (!navigator.clipboard) {
+                fallbackCopyTextToClipboard(textToCopy);
+                return;
+            }
+
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showSuccess();
+            }).catch(err => {
+                // If async API fails (often due to permissions in iframes), use fallback
+                console.warn('Async Clipboard API failed, trying fallback', err);
+                fallbackCopyTextToClipboard(textToCopy);
+            });
+        }
+    </script>
+</body>
+</html>
