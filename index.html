@@ -239,13 +239,6 @@
             border: 1px solid var(--border-color);
         }
 
-        .placeholder-text {
-            color: var(--text-sub);
-            text-align: center;
-            margin-top: 40%;
-            font-size: 1.1rem;
-        }
-
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -387,15 +380,7 @@
                         📋 コピーする
                     </button>
                 </div>
-                <div id="outputContent" class="output-content">
-                    <div class="placeholder-text">
-                        左側の項目を入力して<br>
-                        ボタンを押してください。<br>
-                        <br>
-                        ここにGemini用の設計指示書が<br>
-                        自動生成されます。
-                    </div>
-                </div>
+                <div id="outputContent" class="output-content"></div>
             </div>
         </div>
     </div>
@@ -478,12 +463,12 @@ ${targetUser}
 
         function copyToClipboard() {
             const content = document.getElementById('outputContent');
-            if (content.querySelector('.placeholder-text')) {
+            const textToCopy = content.textContent;
+
+            if (!textToCopy.trim()) {
                 alert("まずはプロンプトを生成してください。");
                 return;
             }
-
-            const textToCopy = content.textContent;
 
             // Function to handle UI updates on success
             const showSuccess = () => {
